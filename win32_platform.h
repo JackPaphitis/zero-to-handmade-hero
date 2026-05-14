@@ -9,13 +9,14 @@ struct PlatformWindow
 };
 
 LRESULT CALLBACK 
-WindowProc(
+win32_window_proc(
 		HWND hwnd, 
 		UINT message, 
 		WPARAM wParam,
 		LPARAM lParam);
 
 PlatformWindow*
-win32_create_window(
-		LPCWSTR class_name,
-		HINSTANCE hInstance);
+win32_create_window(LPCWSTR class_name);
+
+int 
+win32_pump_messages();

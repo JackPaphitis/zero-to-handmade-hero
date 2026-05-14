@@ -1,4 +1,9 @@
+#include "engine.h"
 #include "win32_platform.h"
+
+// engine
+//	renderer (opengl, vulkan)
+//	window (win32, linux)
 
 int
 CALLBACK
@@ -7,12 +12,30 @@ WinMain(HINSTANCE hInstance,
 		LPSTR lpCmdLine,
 		int nShowCmd)
 {
-	const LPCWSTR CLASS_NAME= L"Test window name";
-	
-	PlatformWindow* platform_window 
-		= win32_create_window(CLASS_NAME, hInstance);
+	// bootstrap api
+	PlatformApi platform_api = 
+	{ 
+		win32_create_window,
+		win32_pump_messages,
+	};
 
-	ShowWindow(platform_window->handle, nShowCmd);
+	Engine engine = init_engine(&platform_api);
+
+	if (engine.platform_window != nullptr)
+	{
+		OutputDebugStringW(L"Window");
+	}
+	else
+	{
+		OutputDebugStringW(L"NO WINDOW");
+	}
+	
+	ShowWindow(engine.platform_window->handle, nShowCmd);
+
+	while(engine.platform_api->pump_messages())
+	{
+
+	}
 
 	return 0;
 }
