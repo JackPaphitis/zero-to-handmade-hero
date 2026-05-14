@@ -7,14 +7,32 @@ win32_window_proc(
 		WPARAM wParam,
 		LPARAM lParam)
 {
-	return DefWindowProc(hwnd,message, wParam, lParam);
+	switch (message)
+	{
+		case WM_SIZE:
+		{
+			// TODO dealing with resize of window
+		} break;
+		case WM_CLOSE:
+		{
+			DestroyWindow(hwnd);
+		} break;
+		case WM_DESTROY:
+		{
+			PostQuitMessage(0);
+		} break;
+		default:
+		{
+			return DefWindowProc(hwnd, message, wParam, lParam);
+		}
+	}
+	return 0;
 }
 
 PlatformWindow*
-win32_create_window(
-		LPCWSTR class_name,
-		HINSTANCE hInstance)
+win32_create_window(LPCWSTR class_name)
 {
+	HINSTANCE hInstance = GetModuleHandle(NULL);
 	PlatformWindow* platform_window
 		= (PlatformWindow*)malloc(sizeof(PlatformWindow));
 	
@@ -35,6 +53,7 @@ win32_create_window(
 	
 	if (hwnd == 0)
 	{
+		OutputDebugStringW(L"Handle to window is 0");
 		return nullptr;	
 	}
 
@@ -43,3 +62,37 @@ win32_create_window(
 
 	return platform_window;
 }
+
+int 
+win32_pump_messages()
+{
+	MSG msg = {};
+	while(PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
+	{
+		if(msg.message == WM_QUIT)
+		{
+			return 0;
+		}
+		
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	return 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
