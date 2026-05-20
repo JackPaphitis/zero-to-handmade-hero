@@ -1,5 +1,6 @@
 #include "engine.h"
 #include "win32_platform.h"
+#include "arena.h"
 
 // engine
 //	renderer (opengl, vulkan)
@@ -17,9 +18,16 @@ WinMain(HINSTANCE hInstance,
 	{ 
 		win32_create_window,
 		win32_pump_messages,
+		win32_init_memory,
+		// win32_destroy_memory,
 	};
 
-	Engine engine = init_engine(&platform_api);
+	MemoryChunk mem = platform_api.init_memory(1024);
+
+	Arena engine_memory = {0};
+	init_arena(engine_memory, mem.begin, mem.size/2);
+	
+	Engine engine = init_engine(&platform_api, engine_memory);
 
 	if (engine.platform_window != nullptr)
 	{
