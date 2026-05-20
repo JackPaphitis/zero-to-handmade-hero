@@ -12,6 +12,6 @@ struct Engine
 // getting memory
 
 Engine
-init_engine(PlatformApi* platform_api);
+init_engine(PlatformApi* platform_api, Arena arena);
 
 

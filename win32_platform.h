@@ -1,11 +1,19 @@
 #pragma once
 
 #include <Windows.h>
+#include "util.h"
+#include "arena.h"
 
 struct PlatformWindow
 {
 	HWND handle;
 	LPCWSTR class_name;
+};
+
+struct MemoryChunk
+{
+	u8* begin;
+	size_t size;
 };
 
 LRESULT CALLBACK 
@@ -16,7 +24,13 @@ win32_window_proc(
 		LPARAM lParam);
 
 PlatformWindow*
-win32_create_window(LPCWSTR class_name);
+win32_create_window(LPCWSTR class_name, Arena arena);
 
 int 
 win32_pump_messages();
+
+MemoryChunk
+win32_init_memory(size_t size);
+
+int
+win32_destroy_memory(MemoryChunk mem);

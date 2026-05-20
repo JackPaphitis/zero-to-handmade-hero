@@ -30,11 +30,11 @@ win32_window_proc(
 }
 
 PlatformWindow*
-win32_create_window(LPCWSTR class_name)
+win32_create_window(LPCWSTR class_name, Arena arena)
 {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	PlatformWindow* platform_window
-		= (PlatformWindow*)malloc(sizeof(PlatformWindow));
+		= (PlatformWindow*)arena_malloc_align(arena, 32, DEFUALT_ALIGNMENT);
 	
 	WNDCLASSW wc = {0};
 	wc.lpfnWndProc = win32_window_proc;
@@ -81,12 +81,24 @@ win32_pump_messages()
 	return 1;
 }
 
+MemoryChunk
+win32_init_memory(size_t size)
+{
+	MemoryChunk mem = {};
+	mem.begin = (u8*)VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	mem.size = size;
 
+	return mem;
+}
 
-
-
-
-
+int
+win32_destory_memory(MemoryChunk mem)
+{
+	int destroyed = VirtualFree(mem.begin, mem.size, MEM_DECOMMIT | MEM_RELEASE);	
+	mem.begin = 0;
+	mem.size = 0;
+	return destroyed;
+}
 
 
 
