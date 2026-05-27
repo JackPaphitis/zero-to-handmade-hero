@@ -7,8 +7,10 @@ struct MemoryChunk;
 
 struct PlatformApi
 {
-	PlatformWindow* (*create_window)(const wchar_t *, Arena arena);
+	// TODO this is incorrect, this will make a copy of my arena in
+	// function and not change the actual arena, pass a pointer
+	PlatformWindow* (*create_window)(const wchar_t *, Arena* arena);
 	int (*pump_messages)();
 	MemoryChunk (*init_memory)(size_t);
-	//int (*destroy_memory)(MemoryChunk);
+	int (*destroy_memory)(MemoryChunk);
 };
