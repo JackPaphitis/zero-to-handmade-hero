@@ -30,11 +30,17 @@ win32_window_proc(
 }
 
 PlatformWindow*
-win32_create_window(LPCWSTR class_name, Arena arena)
+win32_create_window(
+		LPCWSTR class_name, 
+		Arena* arena)
 {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
+
 	PlatformWindow* platform_window
-		= (PlatformWindow*)arena_malloc_align(arena, 32, DEFUALT_ALIGNMENT);
+		= (PlatformWindow*)arena_malloc_align(
+				arena, 
+				sizeof(PlatformWindow), 
+				DEFAULT_ALIGNMENT);
 	
 	WNDCLASSW wc = {0};
 	wc.lpfnWndProc = win32_window_proc;
@@ -46,7 +52,7 @@ win32_create_window(LPCWSTR class_name, Arena arena)
 	HWND hwnd = CreateWindowExW(
 			0,
 			class_name,
-			L"Learning",
+			L"LEARNING",
 			WS_OVERLAPPEDWINDOW,
 			CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 			CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
@@ -54,7 +60,7 @@ win32_create_window(LPCWSTR class_name, Arena arena)
 	if (hwnd == 0)
 	{
 		OutputDebugStringW(L"Handle to window is 0");
-		return nullptr;	
+		return NULL;	
 	}
 
 	platform_window->handle = hwnd;
@@ -92,9 +98,9 @@ win32_init_memory(size_t size)
 }
 
 int
-win32_destory_memory(MemoryChunk mem)
+win32_destroy_memory(MemoryChunk mem)
 {
-	int destroyed = VirtualFree(mem.begin, mem.size, MEM_DECOMMIT | MEM_RELEASE);	
+	int destroyed = VirtualFree(mem.begin, 0, MEM_RELEASE);	
 	mem.begin = 0;
 	mem.size = 0;
 	return destroyed;

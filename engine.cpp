@@ -1,9 +1,11 @@
 #include "engine.h"
 
 Engine
-init_engine(PlatformApi* platform_api, Arena arena)
+init_engine(
+		PlatformApi* platform_api, 
+		Arena* arena)
 {
-	const wchar_t* class_name = L"Testing the agnostic window";
+	const wchar_t* class_name = L"HELLO";
 	Engine engine = {};
 	engine.platform_api = platform_api;
 

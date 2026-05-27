@@ -24,8 +24,9 @@ win32_window_proc(
 		LPARAM lParam);
 
 PlatformWindow*
-win32_create_window(LPCWSTR class_name, Arena arena);
+win32_create_window(LPCWSTR class_name, Arena* arena);
 
+// TODO pump message could take in a window, to pump specific windows message?
 int 
 win32_pump_messages();
 
