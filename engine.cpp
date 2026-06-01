@@ -1,16 +1,22 @@
 #include "engine.h"
 
-Engine
-init_engine(
-		PlatformApi* platform_api, 
-		Arena* arena)
+static Engine* g_engine = 0;
+
+void
+init_engine(Engine* engine)
 {
-	const wchar_t* class_name = L"HELLO";
-	Engine engine = {};
-	engine.platform_api = platform_api;
+	MemoryChunk engine_memory = engine->platform_api->init_memory(GB(2));
+	engine->engine_memory = engine_memory;
 
-	engine.platform_window 
-	 = platform_api->create_window(class_name, arena);
+	init_arena(	&engine->arena_perm, 
+				engine->engine_memory.begin, 
+				engine->engine_memory.size/2);
+	
+	init_arena(	&engine->arena_assets, 
+				engine->engine_memory.begin + engine->engine_memory.size/2, 
+				engine->engine_memory.size/2);
 
-	return engine;
+	PlatformWindow* window = engine->platform_api->create_window(&engine->arena_perm);
+	engine->platform_window = window;
 }
+

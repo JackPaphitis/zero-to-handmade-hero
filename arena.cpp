@@ -36,4 +36,18 @@ arena_reset(Arena* arena)
 	arena->offset = 0;
 }
 
+void 
+arena_pop(Arena* arena, size_t bytes)
+{
+	if (bytes > arena->offset)
+	{
+		arena->offset = 0;
+	}
+	else
+	{
+		arena->offset -= bytes;
+	}
+}
+
+
 

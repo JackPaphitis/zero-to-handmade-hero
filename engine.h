@@ -1,17 +1,23 @@
 #pragma once
 #include "platform.h"
+#include "arena.h"
+#include "util.h"
 
 struct Engine
 {
+	int is_running;
 	PlatformWindow* platform_window;
 	PlatformApi* platform_api;
+	MemoryChunk engine_memory;
+	Arena arena_perm;
+	Arena arena_assets;
 };
 
-// creating window
-// destroying window
-// getting memory
+void
+init_engine(Engine* engine);
 
-Engine
-init_engine(PlatformApi* platform_api, Arena* arena);
+void
+restart_engine(Engine* engine);
 
-
+void
+destroy_engine(Engine* engine);
