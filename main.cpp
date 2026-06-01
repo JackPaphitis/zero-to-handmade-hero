@@ -14,34 +14,20 @@ WinMain(HINSTANCE hInstance,
 		LPSTR lpCmdLine,
 		int nShowCmd)
 {
-	// bootstrap api
-	PlatformApi platform_api = 
-	{ 
-		win32_create_window,
-		win32_pump_messages,
-		win32_init_memory,
-		win32_destroy_memory,
-	};
-
-	MemoryChunk mem = platform_api.init_memory(GB(1));
-
-	Arena engine_memory = {0};
-	init_arena(&engine_memory, mem.begin, mem.size/2);
+	Engine game_engine = {0};
+	PlatformApi platform_api = {0};
+	platform_api.create_window = win32_create_window;
+	platform_api.pump_messages = win32_pump_messages;
+	platform_api.init_memory = win32_init_memory;
+	platform_api.destroy_memory = win32_destroy_memory;
+	game_engine.platform_api = &platform_api;
 	
-	Engine engine = init_engine(&platform_api, &engine_memory);
+	init_engine(&game_engine);
 
-	if (engine.platform_window != 0)
-	{
-		OutputDebugStringW(L"Window");
-	}
-	else
-	{
-		OutputDebugStringW(L"NO WINDOW");
-	}
-	
-	ShowWindow(engine.platform_window->handle, nShowCmd);
+	// TODO window code, take out to show_window platform_api?
+	ShowWindow(game_engine.platform_window->handle, nShowCmd);
 
-	while(engine.platform_api->pump_messages())
+	while(game_engine.platform_api->pump_messages())
 	{
 
 	}

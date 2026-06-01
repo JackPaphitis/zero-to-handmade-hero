@@ -30,10 +30,10 @@ win32_window_proc(
 }
 
 PlatformWindow*
-win32_create_window(
-		LPCWSTR class_name, 
-		Arena* arena)
+win32_create_window(Arena* arena)
 {
+	const wchar_t class_name[] = L"HELLO, DEAL WITH THIS LATER";
+
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
 	PlatformWindow* platform_window
@@ -52,7 +52,7 @@ win32_create_window(
 	HWND hwnd = CreateWindowExW(
 			0,
 			class_name,
-			L"LEARNING",
+			L"LEarning",
 			WS_OVERLAPPEDWINDOW,
 			CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 			CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
@@ -88,7 +88,7 @@ win32_pump_messages()
 }
 
 MemoryChunk
-win32_init_memory(size_t size)
+win32_init_memory(u64 size)
 {
 	MemoryChunk mem = {};
 	mem.begin = (u8*)VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
@@ -98,11 +98,11 @@ win32_init_memory(size_t size)
 }
 
 int
-win32_destroy_memory(MemoryChunk mem)
+win32_destroy_memory(MemoryChunk* mem)
 {
-	int destroyed = VirtualFree(mem.begin, 0, MEM_RELEASE);	
-	mem.begin = 0;
-	mem.size = 0;
+	int destroyed = VirtualFree(mem->begin, 0, MEM_RELEASE);	
+	mem->begin = 0;
+	mem->size = 0;
 	return destroyed;
 }
 
