@@ -1,7 +1,10 @@
 #include "arena.h"
 
 void
-init_arena(Arena* arena, u8* begin, size_t size)
+arena_init(	
+		Arena*	arena, 
+		u8*		begin, 
+		size_t	size)
 {
 	arena->begin = begin;
 	arena->offset = 0;
@@ -9,16 +12,16 @@ init_arena(Arena* arena, u8* begin, size_t size)
 }
 
 void*
-arena_malloc_align(Arena* arena, size_t bytes, size_t alignment)
+arena_push(
+		Arena* arena, 
+		size_t bytes, 
+		size_t alignment)
 {
-	if (!IS_POW2(alignment))
-	{
-		return 0;
-	}
+	ASSERT(IS_POW2(alignment))
 
-	uintptr_t current = (uintptr_t)arena->begin + arena->offset;
-	uintptr_t align = ALIGN(current, alignment);
-	size_t newoffset = (align - (uintptr_t)arena->begin) + bytes;
+	uintptr_t current	= (uintptr_t)arena->begin + arena->offset;
+	uintptr_t align		= ALIGN(current, alignment);
+	size_t newoffset	= (align - (uintptr_t)arena->begin) + bytes;
 
 	if (newoffset > arena->capacity)
 	{
@@ -39,6 +42,10 @@ arena_reset(Arena* arena)
 void 
 arena_pop(Arena* arena, size_t bytes)
 {
+	// TODO(jack): this seems bad, we dont want 
+	// to pop off a stack that aligned.
+	// how do we know we popped correctly
+	// we should add save points and pop back to save
 	if (bytes > arena->offset)
 	{
 		arena->offset = 0;

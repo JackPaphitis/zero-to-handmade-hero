@@ -1,11 +1,11 @@
 #include "win32_platform.h"
 
-LRESULT CALLBACK 
+static LRESULT CALLBACK 
 win32_window_proc(
-		HWND hwnd, 
-		UINT message, 
-		WPARAM wParam,
-		LPARAM lParam)
+		HWND	hwnd, 
+		UINT	message, 
+		WPARAM	wParam,
+		LPARAM	lParam)
 {
 	switch (message)
 	{
@@ -23,7 +23,7 @@ win32_window_proc(
 		} break;
 		default:
 		{
-			return DefWindowProc(hwnd, message, wParam, lParam);
+			return DefWindowProcW(hwnd, message, wParam, lParam);
 		}
 	}
 	return 0;
@@ -32,30 +32,30 @@ win32_window_proc(
 PlatformWindow*
 win32_create_window(Arena* arena)
 {
-	const wchar_t class_name[] = L"HELLO, DEAL WITH THIS LATER";
+	const wchar_t* class_name = L"Zero to Handmade Hero";
 
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
-	PlatformWindow* platform_window
-		= (PlatformWindow*)arena_malloc_align(
-				arena, 
-				sizeof(PlatformWindow), 
-				DEFAULT_ALIGNMENT);
-	
-	WNDCLASSW wc = {0};
-	wc.lpfnWndProc = win32_window_proc;
-	wc.hInstance = hInstance;
-	wc.lpszClassName = class_name;
+	WNDCLASSW wc		= {0};
+	wc.lpfnWndProc		= win32_window_proc;
+	wc.hInstance		= hInstance;
+	wc.lpszClassName	= class_name;
 
 	RegisterClassW(&wc);
 
 	HWND hwnd = CreateWindowExW(
 			0,
 			class_name,
-			L"LEarning",
+			class_name,
 			WS_OVERLAPPEDWINDOW,
-			CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-			CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
+			CW_USEDEFAULT, 
+			CW_USEDEFAULT, 
+			800,
+			400, 
+			NULL, 
+			NULL, 
+			hInstance, 
+			NULL);
 	
 	if (hwnd == 0)
 	{
@@ -63,8 +63,16 @@ win32_create_window(Arena* arena)
 		return NULL;	
 	}
 
-	platform_window->handle = hwnd;
+	PlatformWindow* platform_window
+		= (PlatformWindow*)arena_push(
+				arena, 
+				sizeof(PlatformWindow), 
+				DEFAULT_ALIGNMENT);
+
+	platform_window->handle		= hwnd;
 	platform_window->class_name = class_name;
+
+	win32_show_window(platform_window);
 
 	return platform_window;
 }
@@ -72,7 +80,7 @@ win32_create_window(Arena* arena)
 int 
 win32_pump_messages()
 {
-	MSG msg = {};
+	MSG msg = {0};
 	while(PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
 	{
 		if(msg.message == WM_QUIT)
@@ -87,22 +95,32 @@ win32_pump_messages()
 	return 1;
 }
 
-MemoryChunk
-win32_init_memory(u64 size)
+int
+win32_show_window(PlatformWindow* window)
 {
-	MemoryChunk mem = {};
-	mem.begin = (u8*)VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-	mem.size = size;
+	HWND handle = window->handle;	
+	int window_shown = ShowWindow(handle, SW_SHOW);
 
+	return window_shown; 
+}
+
+MemoryChunk
+win32_init_memory(size_t size)
+{
+	MemoryChunk mem	= {0};
+	mem.begin		= (u8*)VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	mem.size		= size;
 	return mem;
 }
+
+
 
 int
 win32_destroy_memory(MemoryChunk* mem)
 {
-	int destroyed = VirtualFree(mem->begin, 0, MEM_RELEASE);	
-	mem->begin = 0;
-	mem->size = 0;
+	int destroyed	= VirtualFree(mem->begin, 0, MEM_RELEASE);	
+	mem->begin		= 0;
+	mem->size		= 0;
 	return destroyed;
 }
 
