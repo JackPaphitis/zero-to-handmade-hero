@@ -12,3 +12,8 @@
 #define GB(X) (u64)(MB(X) * 1024)
 #define TB(X) (u64)(GB(X) * 1024)
 
+#ifdef DEBUG
+#define ASSERT(X) if(!(X)) { *(int*)0 = 0; }
+#else
+#define ASSERT(X)
+#endif
