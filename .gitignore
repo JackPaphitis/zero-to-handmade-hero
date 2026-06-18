@@ -16,6 +16,7 @@
 
 # Debugger Files
 *.pdb
+*.idb
 
 # Compiled Dynamic libraries
 *.so
@@ -38,6 +39,7 @@
 *.exe
 *.out
 *.app
+*.bat
 
 # Build directories
 build/
