@@ -6,7 +6,7 @@ struct Engine
 	int				is_running;
 	PlatformWindow* platform_window;
 	PlatformApi		platform_api;
-	MemoryChunk		engine_memory;
+	MemoryChunk		total_memory;
 	Arena			arena_perm;
 	Arena			arena_assets;
 };
@@ -15,10 +15,8 @@ void
 engine_init(Engine* engine);
 
 void
-engine_update_frame();
+engine_update_frame(Engine* engine);
 
 void
-engine_destroy();
+engine_destroy(Engine* engine);
 
-void
-engine_reset();

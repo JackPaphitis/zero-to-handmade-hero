@@ -1,5 +1,8 @@
 #include "win32_platform.h"
 
+static int
+win32_show_window(PlatformWindow* window);
+
 static LRESULT CALLBACK 
 win32_window_proc(
 		HWND	hwnd, 
@@ -9,15 +12,15 @@ win32_window_proc(
 {
 	switch (message)
 	{
-		case WM_SIZE:
+		case WM_SIZE: // This gets called when we resize the window
 		{
 			// TODO dealing with resize of window
 		} break;
-		case WM_CLOSE:
+		case WM_CLOSE: // This is the message that user has asked to close window
 		{
 			DestroyWindow(hwnd);
 		} break;
-		case WM_DESTROY:
+		case WM_DESTROY: // This is the message the window has been destroyed
 		{
 			PostQuitMessage(0);
 		} break;
@@ -32,7 +35,7 @@ win32_window_proc(
 PlatformWindow*
 win32_create_window(Arena* arena)
 {
-	const wchar_t* class_name = L"Zero to Handmade Hero";
+	const wchar_t* class_name = L"zthm-engine";
 
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
@@ -41,12 +44,13 @@ win32_create_window(Arena* arena)
 	wc.hInstance		= hInstance;
 	wc.lpszClassName	= class_name;
 
+	// TODO(Jack): Check this return value
 	RegisterClassW(&wc);
 
 	HWND hwnd = CreateWindowExW(
 			0,
 			class_name,
-			class_name,
+			L"Zero to handmade hero engine window",
 			WS_OVERLAPPEDWINDOW,
 			CW_USEDEFAULT, 
 			CW_USEDEFAULT, 
@@ -71,10 +75,20 @@ win32_create_window(Arena* arena)
 
 	platform_window->handle		= hwnd;
 	platform_window->class_name = class_name;
+	platform_window->dc			= GetDC(hwnd);
 
 	win32_show_window(platform_window);
 
 	return platform_window;
+}
+
+void
+win32_destroy_window(PlatformWindow* window)
+{
+	int dc_released			= ReleaseDC(window->handle, window->dc);
+	int window_destroyed	= DestroyWindow(window->handle);
+
+	//TODO(Jack): When logger or error handling, comeback
 }
 
 int 
@@ -89,13 +103,13 @@ win32_pump_messages()
 		}
 		
 		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		DispatchMessageW(&msg);
 	}
 
 	return 1;
 }
 
-int
+static int
 win32_show_window(PlatformWindow* window)
 {
 	HWND handle = window->handle;	
@@ -105,24 +119,106 @@ win32_show_window(PlatformWindow* window)
 }
 
 MemoryChunk
-win32_init_memory(size_t size)
+win32_init_memory(size_t capacity)
 {
 	MemoryChunk mem	= {0};
-	mem.begin		= (u8*)VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-	mem.size		= size;
+	mem.begin		= (u8*)VirtualAlloc(0, capacity, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	mem.capacity	= capacity;
 	return mem;
 }
-
-
 
 int
 win32_destroy_memory(MemoryChunk* mem)
 {
 	int destroyed	= VirtualFree(mem->begin, 0, MEM_RELEASE);	
 	mem->begin		= 0;
-	mem->size		= 0;
+	mem->capacity	= 0;
 	return destroyed;
 }
+
+FileData*
+win32_read_file(
+		const wchar_t*	path, 
+		Arena*			arena)
+{
+	HANDLE file_handle = CreateFileW(
+			path,
+			GENERIC_READ,
+			FILE_SHARE_READ,
+			NULL,
+			OPEN_EXISTING,
+			FILE_ATTRIBUTE_NORMAL,
+			NULL
+			);
+
+	if (file_handle == 0)
+	{
+		return 0;
+	}
+
+	size_t restore_point = arena_save(arena);
+
+	FileData* file = (FileData*)arena_push(
+			arena,
+			sizeof(FileData),
+			DEFAULT_ALIGNMENT);
+	
+	LARGE_INTEGER file_size = {0};
+
+	if (!GetFileSizeEx(file_handle, &file_size))
+	{
+		arena_restore(arena, restore_point);
+		CloseHandle(file_handle);
+		return 0;
+	}
+	
+	// TODO(Jack): is this big enough?
+	file->size = (u32)file_size.QuadPart;
+
+	file->file_bytes = (char*)arena_push(
+			arena,
+			sizeof(file->size) + 1,
+			DEFAULT_ALIGNMENT);
+
+	DWORD bytes_read = 0;
+	int file_read = ReadFile(
+			file_handle,
+			file->file_bytes,
+			file->size,
+			&bytes_read,
+			NULL);
+	int correct_size = (bytes_read == file->size); 
+
+	CloseHandle(file_handle);
+
+	if (!(file_read && correct_size))
+	{
+		arena_restore(arena, restore_point);
+		return 0;
+	}
+	
+	return file;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

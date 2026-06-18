@@ -2,13 +2,11 @@
 
 void
 arena_init(	
-		Arena*	arena, 
-		u8*		begin, 
-		size_t	size)
+		Arena*		arena, 
+		MemoryChunk	mem)
 {
-	arena->begin = begin;
-	arena->offset = 0;
-	arena->capacity = size;
+	arena->mem			= mem;
+	arena->offset		= 0;
 }
 
 void*
@@ -19,11 +17,11 @@ arena_push(
 {
 	ASSERT(IS_POW2(alignment))
 
-	uintptr_t current	= (uintptr_t)arena->begin + arena->offset;
+	uintptr_t current	= (uintptr_t)arena->mem.begin + arena->offset;
 	uintptr_t align		= ALIGN(current, alignment);
-	size_t newoffset	= (align - (uintptr_t)arena->begin) + bytes;
+	size_t newoffset	= (align - (uintptr_t)arena->mem.begin) + bytes;
 
-	if (newoffset > arena->capacity)
+	if (newoffset > arena->mem.capacity)
 	{
 		// TODO is this what we want to return here?
 		return 0;
@@ -39,20 +37,20 @@ arena_reset(Arena* arena)
 	arena->offset = 0;
 }
 
-void 
-arena_pop(Arena* arena, size_t bytes)
+size_t
+arena_save(Arena* arena)
 {
-	// TODO(jack): this seems bad, we dont want 
-	// to pop off a stack that aligned.
-	// how do we know we popped correctly
-	// we should add save points and pop back to save
-	if (bytes > arena->offset)
+	return arena->offset;
+}
+
+void 
+arena_restore(
+		Arena* arena, 
+		size_t restore_point)
+{
+	if (restore_point <= arena->offset)
 	{
-		arena->offset = 0;
-	}
-	else
-	{
-		arena->offset -= bytes;
+		arena->offset = restore_point;
 	}
 }
 
