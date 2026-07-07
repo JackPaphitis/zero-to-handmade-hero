@@ -151,7 +151,7 @@ win32_read_file(
 			NULL
 			);
 
-	if (file_handle == 0)
+	if (file_handle == INVALID_HANDLE_VALUE)
 	{
 		return 0;
 	}
@@ -177,7 +177,7 @@ win32_read_file(
 
 	file->file_bytes = (char*)arena_push(
 			arena,
-			sizeof(file->size) + 1,
+			file->size + 1, 
 			DEFAULT_ALIGNMENT);
 
 	DWORD bytes_read = 0;
@@ -196,10 +196,43 @@ win32_read_file(
 		arena_restore(arena, restore_point);
 		return 0;
 	}
-	
+
+	file->file_bytes[file->size] = 0;
 	return file;
 }
 
+int
+win32_write_file(
+	const wchar_t*	path,
+	FileData*		file_data)
+{
+	HANDLE file_handle = CreateFileW(
+			path,
+			GENERIC_WRITE,
+			NULL,
+			NULL,
+			CREATE_ALWAYS,
+			FILE_ATTRIBUTE_NORMAL,
+			NULL
+			);
+	
+	if (file_handle == INVALID_HANDLE_VALUE)
+	{
+		return 0;
+	}
+	
+	DWORD bytes_written = 0;
+	int file_written = WriteFile(
+			file_handle,
+			file_data->file_bytes,
+			file_data->size,
+			&bytes_written,
+			NULL);
+
+	CloseHandle(file_handle);
+	
+	return file_written && (bytes_written == file_data->size);
+}
 
 
 

@@ -17,5 +17,6 @@ struct PlatformApi
 	int				(*pump_messages)();
 	MemoryChunk		(*init_memory)(size_t);
 	int				(*destroy_memory)(MemoryChunk*);
-	FileData*		(*read_files)(const wchar_t* path, Arena* arena);
+	FileData*		(*read_file)(const wchar_t* path, Arena* arena);
+	int				(*write_file)(const wchar_t* path, FileData* data);
 };

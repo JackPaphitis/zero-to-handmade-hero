@@ -27,3 +27,6 @@ win32_destroy_memory(MemoryChunk* mem);
 
 FileData*
 win32_read_file(const wchar_t* path, Arena* arena);
+
+int
+win32_write_file(const wchar_t* path, FileData* file_data);
