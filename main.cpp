@@ -21,6 +21,8 @@ WinMain(
 	game_engine.platform_api.pump_messages	= win32_pump_messages;
 	game_engine.platform_api.init_memory	= win32_init_memory;
 	game_engine.platform_api.destroy_memory = win32_destroy_memory;
+	game_engine.platform_api.read_file		= win32_read_file;
+	game_engine.platform_api.write_file		= win32_write_file;
 
 	engine_init(&game_engine);
 
